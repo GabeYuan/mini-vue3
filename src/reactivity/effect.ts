@@ -1,5 +1,10 @@
+import { extend } from '../shared'
+
 class ReactiveEffect {
     private _fn: any
+    active = true
+    deps = []
+    onStop?: () => void
     constructor(fn, public scheduler?) {
         this._fn = fn
     }
@@ -7,6 +12,19 @@ class ReactiveEffect {
         activeEffect = this
         return this._fn()
     }
+    stop() {
+        if (this.active) {
+            clearupEffect(this)
+            this.onStop && this.onStop()
+            this.active = false
+        }
+    }
+}
+
+const clearupEffect = effect => {
+    effect.deps.forEach((dep: any) => {
+        dep.delete(effect)
+    })
 }
 
 let activeEffect
@@ -25,7 +43,11 @@ export const track = (target, key) => {
         depsMap.set(key, new Set())
     }
     const deps = depsMap.get(key)
+
+    if (!activeEffect) return
+
     deps.add(activeEffect)
+    activeEffect.deps.push(deps)
 }
 
 // 依赖触发器
@@ -40,9 +62,20 @@ export const trigger = (target, key) => {
         }
     }
 }
+
 export const effect = (fn, options: any = {}) => {
     const scheduler = options.scheduler
     const _effect = new ReactiveEffect(fn, scheduler)
+    // extend
+    extend(_effect, options)
     _effect.run()
-    return _effect.run.bind(_effect)
+
+    const runner: any = _effect.run.bind(_effect)
+    runner.effect = _effect
+
+    return runner
+}
+
+export const stop = runner => {
+    runner.effect.stop()
 }
