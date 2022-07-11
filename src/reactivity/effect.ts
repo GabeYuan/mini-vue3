@@ -41,7 +41,7 @@ const clearupEffect = effect => {
 }
 
 const targetMap = new Map()
-const isTracking = () => {
+export const isTracking = () => {
     return shouldTrack && activeEffect !== undefined
 }
 // 依赖收集器
@@ -58,7 +58,10 @@ export const track = (target, key) => {
         depsMap.set(key, new Set())
     }
     const deps = depsMap.get(key)
+    trackEffecs(deps)
+}
 
+export const trackEffecs = deps => {
     if (deps.has(activeEffect)) return
     deps.add(activeEffect)
     activeEffect.deps.push(deps)
@@ -68,6 +71,10 @@ export const track = (target, key) => {
 export const trigger = (target, key) => {
     const depsMap = targetMap.get(target)
     const deps = depsMap.get(key)
+    triggerEffects(deps)
+}
+
+export const triggerEffects = deps => {
     for (const effect of deps) {
         if (effect.scheduler) {
             effect.scheduler()
