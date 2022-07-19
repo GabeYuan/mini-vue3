@@ -1,14 +1,15 @@
+import pkg from './package.json';
 import tsPlugin from "@rollup/plugin-typescript"
 export default {
     input: './src/index.ts',
     output: [
         {
             format: 'cjs',
-            file: 'lib/i-mini-vue.cjs.js',
+            file: pkg.main,
         },
         {
             format: 'es',
-            file: 'lib/i-mini-vue.esm.js',
+            file: pkg.module,
         },
     ],
     plugins: [tsPlugin()],
