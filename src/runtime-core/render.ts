@@ -14,31 +14,13 @@ function patch(vnode, container) {
         processComponent(vnode, container)
     }
 }
-function processComponent(vnode: any, container: any) {
-    // 挂载
-    mountComponent(vnode, container)
-}
-function mountComponent(vnode: any, container: any) {
-    const instance = createComponentInstance(vnode)
-
-    setupComponent(instance)
-    setupRenderEffect(instance, container)
-}
-
-function setupRenderEffect(instance: any, container) {
-    const subTree = instance.render()
-    // vnode tree
-    // vnode ——>patch
-    // vnode ——>element ->mountElement
-    patch(subTree, container)
-}
 
 function processElement(vnode, container) {
     mountElement(vnode, container)
 }
 
 function mountElement(vnode, container) {
-    const el = document.createElement(vnode.type)
+    const el = (vnode.el = document.createElement(vnode.type))
     const { children, props } = vnode
 
     if (typeof children === 'string') {
@@ -62,4 +44,24 @@ function mounteChildren(vnode, container) {
     vnode.children.forEach(v => {
         patch(v, container)
     })
+}
+
+function processComponent(vnode: any, container: any) {
+    // 挂载
+    mountComponent(vnode, container)
+}
+function mountComponent(vnode: any, container: any) {
+    const instance = createComponentInstance(vnode)
+
+    setupComponent(instance)
+    setupRenderEffect(instance, vnode, container)
+}
+
+function setupRenderEffect(instance: any, vnode, container) {
+    const { proxy } = instance
+    const subTree = instance.render.call(proxy)
+
+    patch(subTree, container)
+
+    vnode.el = subTree.el
 }
