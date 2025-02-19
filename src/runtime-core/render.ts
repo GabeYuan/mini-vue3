@@ -1,20 +1,40 @@
 import { ShapeFlags } from '../shared/ShapeFlags'
 import { createComponentInstance, setupComponent } from './component'
+import { Fragment, Text } from './vnode'
 
 export function render(vnode, container) {
     patch(vnode, container)
 }
 
 function patch(vnode, container) {
-    // 处理组件
-    // 判断是不是 elment 处理
-    // 如果是Element调用
-    const { shapeFlag } = vnode
-    if (shapeFlag & ShapeFlags.ELEMENT) {
-        processElement(vnode, container)
-    } else if (shapeFlag | ShapeFlags.STATEFUL_COMPONENT) {
-        processComponent(vnode, container)
+    const { type, shapeFlag } = vnode
+
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container)
+            break
+        case Text:
+            processText(vnode, container)
+            break
+        default:
+            if (shapeFlag & ShapeFlags.ELEMENT) {
+                processElement(vnode, container)
+            } else if (shapeFlag | ShapeFlags.STATEFUL_COMPONENT) {
+                processComponent(vnode, container)
+            }
+            break
     }
+
+}
+
+function processFragment(vnode, container) {
+    mountChildren(vnode, container)
+}
+
+function processText(vnode, container) {
+    const { children } = vnode
+    const textNode = vnode.el = document.createTextNode(children)
+    container.append(textNode)
 }
 
 function processElement(vnode, container) {
@@ -29,14 +49,14 @@ function mountElement(vnode, container) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
         el.textContent = children
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-        mounteChildren(vnode, el)
+        mountChildren(vnode, el)
     }
 
     //  props
     const { props } = vnode
     for (const key in props) {
         const val = props[key]
-        
+
         const isOn = (key: string) => /^on[A-Z]/.test(key)
         if (isOn(key)) {
             const event = key.slice(2).toLowerCase()
@@ -52,7 +72,7 @@ function mountElement(vnode, container) {
     container.appendChild(el)
 }
 
-function mounteChildren(vnode, container) {
+function mountChildren(vnode, container) {
     vnode.children.forEach(v => {
         patch(v, container)
     })
