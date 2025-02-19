@@ -6,7 +6,7 @@
     "license": "MIT",
     "scripts": {
         "test": "jest",
-        "build": "rollup -c rollup.config.js"
+        "build": "rollup -c rollup.config.js --watch"
     },
     "dependencies": {
         "@types/jest": "^28.1.4",
