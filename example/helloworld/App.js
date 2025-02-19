@@ -2,20 +2,16 @@ import { h } from '../../lib/i-mini-vue.esm.js'
 import { Foo } from './Foo.js'
 
 export const App = {
-    render() {
-    //   emit
-        return h("div", {}, [h('div', {},"App"), h(Foo, { 
-            // on+Event
-            onAdd(a, b) {
-                console.log('onAdd', a, b)
-            },
-            // add-foo --> addFoo
-            onAddFoo(){
-                console.log('onAddFoo')
-            }
-         })])
+    render () {
+        const app = h("div", {}, "App")
+
+        const foo = h(Foo, {}, {
+            header: ({age}) => h('p', {}, 'header' + age),
+            footer:() => h('p', {}, 'footer')
+        })
+        return h("div", {}, [app, foo])
     },
-    setup() {
+    setup () {
         return {
             msg: 'mini-vue,duduud',
         }
