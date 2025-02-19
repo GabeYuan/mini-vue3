@@ -1,28 +1,19 @@
 import { h } from '../../lib/i-mini-vue.esm.js'
 import { Foo } from './Foo.js'
-window.self = null
+
 export const App = {
     render() {
-        window.self = this
-        // ui
-        return h(
-            'div',
-            {
-                id: 'root',
-                class: ['red', 'hard'],
-                onClick() {
-                    console.log('click')
-                },
-                onMouseDown() {
-                    console.log('mouseDown')
-                },
+    //   emit
+        return h("div", {}, [h('div', {},"App"), h(Foo, { 
+            // on+Event
+            onAdd(a, b) {
+                console.log('onAdd', a, b)
             },
-            [
-                h('div', {}, 'hi,'+this.msg),
-                h(Foo, {count: 1}),
-            ]
-            // [h('p', { class: 'red' }, '你好， mini-vue'), h('p', { class: 'blue' }, 'hello mini-vue')]
-        )
+            // add-foo --> addFoo
+            onAddFoo(){
+                console.log('onAddFoo')
+            }
+         })])
     },
     setup() {
         return {
